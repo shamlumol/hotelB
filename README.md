@@ -1,10 +1,10 @@
-# 🌊 HotelB - Luxury Retreats & Backwater Escapes
+#  HotelB - Luxury Retreats & Backwater Escapes
 
 HotelB is a MERN-stack web application for booking luxury houseboats and heritage retreat experiences in Kerala, India. It features a premium user interface, customer loyalty system, dynamic stays catalog, and integrated checkout payments.
 
 ---
 
-## 🚀 Quick Start Guide (From Beginning to End)
+## Quick Start Guide (From Beginning to End)
 
 Follow these steps in order to get the entire project up and running locally.
 
@@ -41,7 +41,7 @@ Open your browser and navigate to **`http://localhost:5173/`** to begin explorin
 
 ---
 
-## 👥 Seeded Test Accounts
+## Seeded Test Accounts
 
 You can log in instantly with these pre-configured user credentials:
 
@@ -52,7 +52,7 @@ You can log in instantly with these pre-configured user credentials:
 
 ---
 
-## 💳 Stripe Test Payments
+## Stripe Test Payments
 * **Integration:** Rendered securely via Stripe Elements.
 * **Testing:** Select **Credit Card** during checkout and input the Stripe test card:
   * **Card Number:** `4242 4242 4242 4242`
@@ -62,7 +62,7 @@ You can log in instantly with these pre-configured user credentials:
 
 ---
 
-## 📧 Email Confirmations
+##  Email Confirmations
 * **Real Emails:** Configure your Gmail credentials in `backend/.env`:
   ```env
   EMAIL_USER=your-email@gmail.com
@@ -76,13 +76,13 @@ You can log in instantly with these pre-configured user credentials:
 
 ---
 
-## 💬 WhatsApp & SMS Alerts
+##  WhatsApp & SMS Alerts
 * **Simulation Mode:** By default, Twilio alerts run in simulation mode. All message contents (check-in/check-out dates, invoice totals, reservation details) are printed directly to the backend server logs.
 * **Configuration:** If you want real WhatsApp/SMS delivery, uncomment the Twilio fields in `backend/.env` and add your Twilio Account SID, Auth Token, and phone numbers.
 
 ---
 
-## 🧪 Testing Suites
+##  Testing Suites
 HotelB contains automated test suites for both frontend and backend to verify feature stability.
 
 ### Backend Tests (Jest & Supertest)
@@ -103,7 +103,7 @@ npm test
 
 ---
 
-## 🚀 CI/CD Pipeline & Deployments
+##  CI/CD Pipeline & Deployments
 This repository includes a pre-configured GitHub Actions CI/CD workflow (`.github/workflows/deploy.yml`) that executes on every push/pull-request to the `main` or `master` branches:
 
 1. **Test-Backend:** Spawns a clean MongoDB environment and executes the Jest test suite.

@@ -28,6 +28,10 @@ const Checkout = () => {
   const [specialRequests, setSpecialRequests] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('Credit Card');
   const [promoCode, setPromoCode] = useState('');
+  const [upiId, setUpiId] = useState('');
+  const [selectedUpiApp, setSelectedUpiApp] = useState('GPay');
+  const [upiProcessing, setUpiProcessing] = useState(false);
+  const [upiAppLoadingText, setUpiAppLoadingText] = useState('');
 
   // Extract from query params
   const roomTitle = searchParams.get('roomTitle') || 'Default Room';
@@ -42,6 +46,27 @@ const Checkout = () => {
       if (!email) setEmail(user.email || '');
     }
   }, [user]);
+
+  // Fetch Stripe PaymentIntent in the background as soon as total pricing is available
+  useEffect(() => {
+    if (!stay || !total) return;
+
+    const fetchPaymentIntent = async () => {
+      try {
+        const res = await axios.post(`${API_URL}/payments/create-payment-intent`, {
+          amount: Math.round(total * 100), // convert to paise
+          currency: 'inr'
+        });
+        if (res.data.success) {
+          setStripeClientSecret(res.data.clientSecret);
+          setShowStripeForm(true);
+        }
+      } catch (err) {
+        console.error('Payment intent generation failed:', err);
+      }
+    };
+    fetchPaymentIntent();
+  }, [stay, total, API_URL]);
 
   useEffect(() => {
     const fetchStay = async () => {
@@ -245,9 +270,24 @@ const Checkout = () => {
             </div>
           </section>
 
-          <div className="pt-4 text-left">
+          <div className="pt-4 text-left relative">
+            {/* Full-Screen Processing Overlay for UPI App Simulation */}
+            {upiProcessing && (
+              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center text-white p-6">
+                <div className="bg-surface-container-lowest text-on-surface p-8 rounded-2xl max-w-sm w-full text-center shadow-2xl border border-outline-variant space-y-6 animate-fade-in">
+                  <span className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary inline-block"></span>
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-lg text-primary">{upiAppLoadingText}</h3>
+                    <p className="text-xs text-on-surface-variant leading-relaxed">
+                      Please open your UPI app on your phone to authorize the pending transaction request.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {paymentMethod === 'Credit Card' ? (
-              showStripeForm && stripeClientSecret ? (
+              stripeClientSecret ? (
                 <div className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/30 space-y-4">
                   <h3 className="font-semibold text-sm text-primary uppercase tracking-wider flex items-center gap-2">
                     <span className="material-symbols-outlined text-[18px]">credit_card</span>
@@ -294,7 +334,62 @@ const Checkout = () => {
                   </Elements>
                 </div>
               ) : (
-                <button 
+                <div className="flex items-center gap-3 p-4 bg-surface-container rounded-xl text-on-surface-variant text-sm">
+                  <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></span>
+                  Preparing secure payment gateway...
+                </div>
+              )
+            ) : (
+              // UPI Payments UI
+              <div className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/30 space-y-6">
+                <div>
+                  <h3 className="font-semibold text-sm text-primary uppercase tracking-wider flex items-center gap-2 mb-4">
+                    <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+                    Select UPI Application
+                  </h3>
+                  
+                  {/* UPI App Selection Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {[
+                      { id: 'GPay', name: 'Google Pay', icon: 'payments' },
+                      { id: 'PhonePe', name: 'PhonePe', icon: 'account_balance_wallet' },
+                      { id: 'Paytm', name: 'Paytm', icon: 'credit_card' },
+                      { id: 'Custom', name: 'Other UPI ID', icon: 'settings_ethernet' }
+                    ].map((app) => (
+                      <button
+                        key={app.id}
+                        type="button"
+                        onClick={() => setSelectedUpiApp(app.id)}
+                        className={`p-4 rounded-xl border font-semibold text-xs transition-all flex flex-col items-center gap-2 cursor-pointer ${
+                          selectedUpiApp === app.id
+                            ? 'border-primary bg-primary/8 text-primary shadow-sm'
+                            : 'border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-low'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-lg">{app.icon}</span>
+                        {app.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Custom UPI ID Input */}
+                {selectedUpiApp === 'Custom' && (
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-secondary uppercase tracking-wider">UPI ID / VPA</label>
+                    <input
+                      type="text"
+                      value={upiId}
+                      onChange={(e) => setUpiId(e.target.value)}
+                      placeholder="username@okhdfcbank"
+                      className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-3.5 text-sm focus:border-primary outline-none focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
+                )}
+
+                {/* Submit Booking and trigger UPI animation */}
+                <button
+                  type="button"
                   onClick={async (e) => {
                     e.preventDefault();
                     if (!phone) {
@@ -305,39 +400,52 @@ const Checkout = () => {
                       alert('Please fill in your name and email');
                       return;
                     }
-                    try {
-                      setSubmitting(true);
-                      const res = await axios.post(`${API_URL}/payments/create-payment-intent`, {
-                        amount: Math.round(total * 100), // convert to paise / cents
-                        currency: 'inr'
-                      });
-                      if (res.data.success) {
-                        setStripeClientSecret(res.data.clientSecret);
-                        setShowStripeForm(true);
-                      }
-                    } catch (err) {
-                      console.error('Payment intent generation failed:', err);
-                      alert(err.response?.data?.message || 'Failed to initiate payment.');
-                    } finally {
-                      setSubmitting(false);
+                    if (selectedUpiApp === 'Custom' && !upiId.includes('@')) {
+                      alert('Please enter a valid UPI ID (e.g. username@upi)');
+                      return;
                     }
+
+                    // UPI app redirection simulation
+                    setUpiProcessing(true);
+                    setUpiAppLoadingText(selectedUpiApp === 'Custom' ? 'Initiating UPI request...' : `Opening ${selectedUpiApp} App...`);
+                    
+                    setTimeout(() => {
+                      setUpiAppLoadingText('Awaiting authorization...');
+                    }, 1200);
+
+                    setTimeout(async () => {
+                      try {
+                        const res = await axios.post(`${API_URL}/bookings`, {
+                          stayId: id,
+                          roomTitle,
+                          checkIn,
+                          checkOut,
+                          guestCount: parseInt(guests) || 2,
+                          guestDetails: {
+                            name: fullName,
+                            email,
+                            phone: `${dialCode} ${phone}`,
+                            specialRequests
+                          },
+                          paymentMethod: `UPI (${selectedUpiApp})`
+                        });
+
+                        if (res.data.success) {
+                          setUpiProcessing(false);
+                          navigate(`/booking-confirmed/${res.data.data._id}`);
+                        }
+                      } catch (err) {
+                        setUpiProcessing(false);
+                        alert(err.response?.data?.message || 'Error processing reservation');
+                      }
+                    }, 3000);
                   }}
-                  disabled={submitting}
-                  className="w-full md:w-auto bg-primary text-on-primary px-12 py-5 rounded-xl font-bold text-sm flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-md group disabled:opacity-50 cursor-pointer"
+                  className="w-full bg-primary text-on-primary py-4.5 rounded-xl font-bold text-sm shadow-md hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-3 cursor-pointer"
                 >
-                  {submitting ? 'Initiating Stripe...' : 'Continue to Payment'}
-                  <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                  Pay ₹{total.toLocaleString('en-IN')} &amp; Confirm Booking
+                  <span className="material-symbols-outlined">done</span>
                 </button>
-              )
-            ) : (
-              <button 
-                onClick={handleSubmit}
-                disabled={submitting}
-                className="w-full md:w-auto bg-primary text-on-primary px-12 py-5 rounded-xl font-bold text-sm flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-md group disabled:opacity-50 cursor-pointer"
-              >
-                {submitting ? 'Confirming...' : 'Continue to Payment'}
-                <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
-              </button>
+              </div>
             )}
             
             <p className="mt-4 text-xs text-on-surface-variant flex items-center gap-2 font-medium">

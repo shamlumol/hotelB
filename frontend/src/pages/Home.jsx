@@ -68,7 +68,9 @@ const Home = () => {
             loop
             muted
             playsInline
+            poster="https://images.unsplash.com/photo-1593693397690-362cb9666fc2?auto=format&fit=crop&w=1600&q=80"
             className="w-full h-full object-cover scale-105 object-center"
+            style={{ background: 'url(https://images.unsplash.com/photo-1593693397690-362cb9666fc2?auto=format&fit=crop&w=1600&q=80) center/cover no-repeat' }}
           >
             <source src={heroVideo} type="video/mp4" />
             Your browser does not support the video tag.

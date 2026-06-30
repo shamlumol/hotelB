@@ -846,37 +846,45 @@ const StayDetails = () => {
 
               <div className="space-y-4 mb-6">
                 <div className="grid grid-cols-2 border border-outline-variant/30 rounded-lg overflow-hidden text-left">
-                  <div className="p-3 border-r border-outline-variant/30 hover:bg-surface-container-low cursor-pointer transition-colors">
-                    <p className="text-[10px] uppercase font-bold text-secondary">Check-in</p>
-                    <input
-                      type="date"
-                      value={checkIn}
-                      onChange={(e) => setCheckIn(e.target.value)}
-                      className="border-none focus:ring-0 p-0 text-sm font-semibold text-on-surface bg-transparent w-full"
-                    />
+                  <div className="p-3 border-r border-outline-variant/30 hover:bg-surface-container-low transition-colors">
+                    <label className="block text-[10px] uppercase font-bold text-secondary cursor-pointer">
+                      Check-in
+                      <input
+                        type="date"
+                        value={checkIn}
+                        min={getTodayString()}
+                        onChange={(e) => setCheckIn(e.target.value)}
+                        className="border-none focus:ring-0 p-0 text-sm font-semibold text-on-surface bg-transparent w-full mt-1 block cursor-pointer"
+                      />
+                    </label>
                   </div>
-                  <div className="p-3 hover:bg-surface-container-low cursor-pointer transition-colors">
-                    <p className="text-[10px] uppercase font-bold text-secondary">Check-out</p>
-                    <input
-                      type="date"
-                      value={checkOut}
-                      onChange={(e) => setCheckOut(e.target.value)}
-                      className="border-none focus:ring-0 p-0 text-sm font-semibold text-on-surface bg-transparent w-full"
-                    />
+                  <div className="p-3 hover:bg-surface-container-low transition-colors">
+                    <label className="block text-[10px] uppercase font-bold text-secondary cursor-pointer">
+                      Check-out
+                      <input
+                        type="date"
+                        value={checkOut}
+                        min={checkIn || getTodayString()}
+                        onChange={(e) => setCheckOut(e.target.value)}
+                        className="border-none focus:ring-0 p-0 text-sm font-semibold text-on-surface bg-transparent w-full mt-1 block cursor-pointer"
+                      />
+                    </label>
                   </div>
                 </div>
-                <div className="p-3 border border-outline-variant/30 rounded-lg hover:bg-surface-container-low cursor-pointer transition-colors text-left">
-                  <p className="text-[10px] uppercase font-bold text-secondary">Guests</p>
-                  <select
-                    value={guests}
-                    onChange={(e) => setGuests(e.target.value)}
-                    className="border-none focus:ring-0 p-0 text-sm font-semibold text-on-surface bg-transparent w-full"
-                  >
-                    <option value="1 Guest">1 Guest</option>
-                    <option value="2 Guests">2 Guests</option>
-                    <option value="3 Guests">3 Guests</option>
-                    <option value="4 Guests">4 Guests</option>
-                  </select>
+                <div className="p-3 border border-outline-variant/30 rounded-lg hover:bg-surface-container-low transition-colors text-left">
+                  <label className="block text-[10px] uppercase font-bold text-secondary cursor-pointer">
+                    Guests
+                    <select
+                      value={guests}
+                      onChange={(e) => setGuests(e.target.value)}
+                      className="border-none focus:ring-0 p-0 text-sm font-semibold text-on-surface bg-transparent w-full mt-1 block cursor-pointer outline-none"
+                    >
+                      <option value="1 Guest">1 Guest</option>
+                      <option value="2 Guests">2 Guests</option>
+                      <option value="3 Guests">3 Guests</option>
+                      <option value="4 Guests">4 Guests</option>
+                    </select>
+                  </label>
                 </div>
               </div>
 

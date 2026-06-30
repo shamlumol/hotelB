@@ -162,8 +162,13 @@ router.post('/:id/reviews', protect, async (req, res) => {
   try {
     const { comment, rating, cleanliness, service, location } = req.body;
     
-    if (!comment || !rating) {
-      return res.status(400).json({ success: false, message: 'Please provide rating and comment' });
+    const parsedRating = Number(rating || 5);
+    const parsedCleanliness = Number(cleanliness || 5);
+    const parsedService = Number(service || 5);
+    const parsedLocation = Number(location || 5);
+
+    if (!comment) {
+      return res.status(400).json({ success: false, message: 'Please provide a comment' });
     }
 
     const stay = await Stay.findById(req.params.id);
@@ -172,13 +177,13 @@ router.post('/:id/reviews', protect, async (req, res) => {
     }
 
     const newReview = {
-      reviewerName: req.user.name,
+      reviewerName: req.user.name || 'Anonymous Guest',
       dateString: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
       comment,
-      rating: Number(rating),
-      cleanliness: Number(cleanliness || 5),
-      service: Number(service || 5),
-      location: Number(location || 5)
+      rating: isNaN(parsedRating) ? 5 : parsedRating,
+      cleanliness: isNaN(parsedCleanliness) ? 5 : parsedCleanliness,
+      service: isNaN(parsedService) ? 5 : parsedService,
+      location: isNaN(parsedLocation) ? 5 : parsedLocation
     };
 
     stay.reviews.push(newReview);

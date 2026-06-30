@@ -15,10 +15,9 @@ const BookingConfirmed = () => {
     const fetchBookingDetails = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${API_URL}/bookings/me`);
+        const res = await axios.get(`${API_URL}/bookings/${bookingId}`);
         if (res.data.success) {
-          const match = res.data.data.find(b => b._id === bookingId);
-          setBooking(match || null);
+          setBooking(res.data.data);
         }
       } catch (err) {
         console.error('Error fetching confirmed booking:', err);

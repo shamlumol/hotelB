@@ -164,6 +164,33 @@ router.get('/me', protect, async (req, res) => {
   }
 });
 
+// @desc    Get booking by ID
+// @route   GET /api/bookings/:id
+// @access  Private
+router.get('/:id', protect, async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id)
+      .populate('stay')
+      .populate('user', 'name email');
+
+    if (!booking) {
+      return res.status(404).json({ success: false, message: 'Booking not found' });
+    }
+
+    // Check ownership
+    if (booking.user._id.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(401).json({ success: false, message: 'Not authorized to view this booking' });
+    }
+
+    res.json({
+      success: true,
+      data: booking
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // @desc    Get all bookings
 // @route   GET /api/bookings
 // @access  Private/Admin

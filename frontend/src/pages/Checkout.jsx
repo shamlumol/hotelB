@@ -433,23 +433,25 @@ const Checkout = () => {
                   {/* UPI App Selection Grid */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {[
-                      { id: 'GPay', name: 'Google Pay', icon: 'payments' },
-                      { id: 'PhonePe', name: 'PhonePe', icon: 'account_balance_wallet' },
-                      { id: 'Paytm', name: 'Paytm', icon: 'credit_card' },
-                      { id: 'Custom', name: 'Other UPI ID', icon: 'settings_ethernet' }
+                      { id: 'GPay', name: 'Google Pay', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg' },
+                      { id: 'PhonePe', name: 'PhonePe', logo: 'https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg' },
+                      { id: 'Paytm', name: 'Paytm', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo.svg' },
+                      { id: 'Custom', name: 'Other UPI ID', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg' }
                     ].map((app) => (
                       <button
                         key={app.id}
                         type="button"
                         onClick={() => setSelectedUpiApp(app.id)}
-                        className={`p-4 rounded-xl border font-semibold text-xs transition-all flex flex-col items-center gap-2 cursor-pointer ${
+                        className={`p-4 rounded-xl border font-semibold text-xs transition-all flex flex-col items-center justify-between min-h-[90px] w-full cursor-pointer ${
                           selectedUpiApp === app.id
                             ? 'border-primary bg-primary/8 text-primary shadow-sm'
                             : 'border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-low'
                         }`}
                       >
-                        <span className="material-symbols-outlined text-lg">{app.icon}</span>
-                        {app.name}
+                        <div className="h-6 flex items-center justify-center w-full">
+                          <img src={app.logo} alt={app.name} className="max-h-full max-w-[50px] object-contain" />
+                        </div>
+                        <span className="text-[10px] mt-1 tracking-tight text-center">{app.name}</span>
                       </button>
                     ))}
                   </div>

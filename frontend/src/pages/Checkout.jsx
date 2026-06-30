@@ -2,10 +2,10 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import gpayLogo from '../assets/gpay.svg';
-import phonepeLogo from '../assets/phonepe.svg';
-import paytmLogo from '../assets/paytm.svg';
-import upiLogo from '../assets/upi.svg';
+import gpayLogo from '../assets/gpay.png';
+import phonepeLogo from '../assets/phonepe.png';
+import paytmLogo from '../assets/paytm.png';
+import upiLogo from '../assets/upi.png';
 
 const Checkout = () => {
   const { id } = useParams();

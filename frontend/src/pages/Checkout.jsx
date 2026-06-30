@@ -108,9 +108,29 @@ const Checkout = () => {
   const room = stay.rooms?.find(r => r.title === roomTitle);
   const roomPrice = room ? room.price : stay.basePrice;
 
-  // Calculate pricing
-  const checkInDate = new Date(checkIn);
-  const checkOutDate = new Date(checkOut);
+  // Calculate pricing with safe fallbacks if dates are missing or invalid
+  const getTodayString = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const getFutureDateString = (daysAhead) => {
+    const d = new Date();
+    d.setDate(d.getDate() + daysAhead);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const safeCheckIn = (checkIn && !isNaN(new Date(checkIn).getTime())) ? checkIn : getTodayString();
+  const safeCheckOut = (checkOut && !isNaN(new Date(checkOut).getTime()) && new Date(checkOut) > new Date(safeCheckIn)) ? checkOut : getFutureDateString(2);
+
+  const checkInDate = new Date(safeCheckIn);
+  const checkOutDate = new Date(safeCheckOut);
   const diffTime = Math.abs(checkOutDate - checkInDate);
   const nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
 
@@ -305,8 +325,8 @@ const Checkout = () => {
                           const res = await axios.post(`${API_URL}/bookings`, {
                             stayId: id,
                             roomTitle,
-                            checkIn,
-                            checkOut,
+                            checkIn: safeCheckIn,
+                            checkOut: safeCheckOut,
                             guestCount: parseInt(guests) || 2,
                             guestDetails: {
                               name: fullName,
@@ -418,8 +438,8 @@ const Checkout = () => {
                         const res = await axios.post(`${API_URL}/bookings`, {
                           stayId: id,
                           roomTitle,
-                          checkIn,
-                          checkOut,
+                          checkIn: safeCheckIn,
+                          checkOut: safeCheckOut,
                           guestCount: parseInt(guests) || 2,
                           guestDetails: {
                             name: fullName,

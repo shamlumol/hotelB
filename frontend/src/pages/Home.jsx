@@ -80,7 +80,7 @@ const Home = () => {
               preload="none"
               className="w-full h-full object-cover scale-105 object-center"
             >
-              <source src={heroVideo} type="video/mp4" />
+              <source src="https://assets.mixkit.co/videos/preview/mixkit-kerala-backwaters-india-40995-large.mp4" type="video/mp4" />
             </video>
           )}
           <div className="absolute inset-0 bg-black/40"></div>

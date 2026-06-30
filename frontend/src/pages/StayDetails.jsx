@@ -364,7 +364,7 @@ const StayDetails = () => {
     }).toString();
 
     if (!user) {
-      navigate(`/login?redirect=/checkout/${id}?${queryParams}`);
+      navigate(`/login?redirect=${encodeURIComponent(`/checkout/${id}?${queryParams}`)}`);
     } else {
       navigate(`/checkout/${id}?${queryParams}`);
     }

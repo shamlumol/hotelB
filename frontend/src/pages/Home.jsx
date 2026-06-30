@@ -77,7 +77,7 @@ const Home = () => {
               loop
               muted
               playsInline
-              preload="metadata"
+              preload="none"
               className="w-full h-full object-cover scale-105 object-center"
             >
               <source src={heroVideo} type="video/mp4" />

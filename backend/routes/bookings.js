@@ -45,6 +45,15 @@ router.post('/', protect, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid check-in or check-out date' });
     }
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkInCompare = new Date(checkInDate);
+    checkInCompare.setHours(0, 0, 0, 0);
+
+    if (checkInCompare < today) {
+      return res.status(400).json({ success: false, message: 'Check-in date cannot be in the past' });
+    }
+
     if (checkOutDate <= checkInDate) {
       return res.status(400).json({ success: false, message: 'Check-out must be after check-in' });
     }

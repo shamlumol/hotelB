@@ -2,9 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements } from '@stripe/react-stripe-js';
-import StripePaymentForm from '../components/StripePaymentForm';
 
 const Checkout = () => {
   const { id } = useParams();
@@ -12,17 +9,15 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { API_URL, user } = useContext(AuthContext);
 
-  const stripePromise = React.useMemo(() => {
-    const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder_publishable';
-    const isValid = stripeKey && stripeKey.startsWith('pk_') && stripeKey.length > 25;
-    return isValid ? loadStripe(stripeKey) : null;
-  }, []);
-
   const [stay, setStay] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [stripeClientSecret, setStripeClientSecret] = useState('');
-  const [showStripeForm, setShowStripeForm] = useState(false);
+
+  // Simulated credit card states
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvc, setCardCvc] = useState('');
+  const [cardName, setCardName] = useState('');
 
   // Form states - populated from user when available
   const [fullName, setFullName] = useState('');
@@ -50,27 +45,6 @@ const Checkout = () => {
       if (!email) setEmail(user.email || '');
     }
   }, [user]);
-
-  // Fetch Stripe PaymentIntent in the background as soon as total pricing is available
-  useEffect(() => {
-    if (!stay || !total) return;
-
-    const fetchPaymentIntent = async () => {
-      try {
-        const res = await axios.post(`${API_URL}/payments/create-payment-intent`, {
-          amount: Math.round(total * 100), // convert to paise
-          currency: 'inr'
-        });
-        if (res.data.success) {
-          setStripeClientSecret(res.data.clientSecret);
-          setShowStripeForm(true);
-        }
-      } catch (err) {
-        console.error('Payment intent generation failed:', err);
-      }
-    };
-    fetchPaymentIntent();
-  }, [stay, total, API_URL]);
 
   useEffect(() => {
     const fetchStay = async () => {
@@ -174,6 +148,63 @@ const Checkout = () => {
     } catch (err) {
       console.error('Error submitting booking:', err);
       alert(err.response?.data?.message || 'Error processing reservation. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSimulatedCardPayment = async (e) => {
+    e.preventDefault();
+    if (!phone) {
+      alert('Please enter your phone number');
+      return;
+    }
+    if (!fullName || !email) {
+      alert('Please fill in your name and email');
+      return;
+    }
+    if (!cardNumber || cardNumber.length < 15) {
+      alert('Please enter a valid card number');
+      return;
+    }
+    if (!cardExpiry || !cardExpiry.includes('/')) {
+      alert('Please enter a valid expiry date (MM/YY)');
+      return;
+    }
+    if (cardCvc.length < 3) {
+      alert('Please enter a valid CVC');
+      return;
+    }
+    if (!cardName) {
+      alert('Please enter the cardholder name');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      const res = await axios.post(`${API_URL}/bookings`, {
+        stayId: id,
+        roomTitle,
+        checkIn: safeCheckIn,
+        checkOut: safeCheckOut,
+        guestCount: parseInt(guests) || 2,
+        guestDetails: {
+          name: fullName,
+          email,
+          phone: `${dialCode} ${phone}`,
+          specialRequests
+        },
+        paymentMethod: 'Credit Card (Simulated)',
+        paymentIntentId: `sim_cc_${Date.now()}`
+      });
+
+      if (res.data.success) {
+        navigate(`/booking-confirmed/${res.data.data._id}`);
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error processing reservation');
     } finally {
       setSubmitting(false);
     }
@@ -311,58 +342,85 @@ const Checkout = () => {
             )}
 
             {paymentMethod === 'Credit Card' ? (
-              stripeClientSecret ? (
-                <div className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/30 space-y-4">
-                  <h3 className="font-semibold text-sm text-primary uppercase tracking-wider flex items-center gap-2">
+              <div className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/30 space-y-6">
+                <div className="space-y-4 text-left">
+                  <h3 className="font-semibold text-sm text-primary uppercase tracking-wider flex items-center gap-2 mb-2">
                     <span className="material-symbols-outlined text-[18px]">credit_card</span>
-                    Enter Card Details
+                    Simulated Credit Card Details
                   </h3>
-                  <Elements stripe={stripePromise}>
-                    <StripePaymentForm
-                      clientSecret={stripeClientSecret}
-                      totalAmount={`₹${total.toLocaleString('en-IN')}`}
-                      guestName={fullName}
-                      guestEmail={email}
-                      onSuccess={async (paymentIntentId) => {
-                        try {
-                          setSubmitting(true);
-                          const res = await axios.post(`${API_URL}/bookings`, {
-                            stayId: id,
-                            roomTitle,
-                            checkIn: safeCheckIn,
-                            checkOut: safeCheckOut,
-                            guestCount: parseInt(guests) || 2,
-                            guestDetails: {
-                              name: fullName,
-                              email,
-                              phone: `${dialCode} ${phone}`,
-                              specialRequests
-                            },
-                            paymentMethod: 'Credit Card',
-                            paymentIntentId: paymentIntentId
-                          });
-
-                          if (res.data.success) {
-                            navigate(`/booking-confirmed/${res.data.data._id}`);
-                          }
-                        } catch (err) {
-                          alert(err.response?.data?.message || 'Error processing reservation');
-                        } finally {
-                          setSubmitting(false);
-                        }
-                      }}
-                      onError={(err) => {
-                        alert(err || 'Payment failed.');
-                      }}
+                  
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-secondary uppercase tracking-wider">Card Number</label>
+                    <input
+                      type="text"
+                      value={cardNumber}
+                      onChange={(e) => setCardNumber(e.target.value.replace(/\s?/g, '').replace(/(\d{4})/g, '$1 ').trim())}
+                      maxLength="19"
+                      placeholder="4242 4242 4242 4242"
+                      className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-3.5 text-sm focus:border-primary outline-none focus:ring-1 focus:ring-primary text-on-surface"
+                      required
                     />
-                  </Elements>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="block text-xs font-bold text-secondary uppercase tracking-wider">Expiry Date</label>
+                      <input
+                        type="text"
+                        value={cardExpiry}
+                        onChange={(e) => setCardExpiry(e.target.value)}
+                        placeholder="MM/YY"
+                        maxLength="5"
+                        className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-3.5 text-sm focus:border-primary outline-none focus:ring-1 focus:ring-primary text-on-surface"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-xs font-bold text-secondary uppercase tracking-wider">CVC</label>
+                      <input
+                        type="password"
+                        value={cardCvc}
+                        onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, ''))}
+                        placeholder="123"
+                        maxLength="3"
+                        className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-3.5 text-sm focus:border-primary outline-none focus:ring-1 focus:ring-primary text-on-surface"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-secondary uppercase tracking-wider">Cardholder Name</label>
+                    <input
+                      type="text"
+                      value={cardName}
+                      onChange={(e) => setCardName(e.target.value)}
+                      placeholder="John Doe"
+                      className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-3.5 text-sm focus:border-primary outline-none focus:ring-1 focus:ring-primary text-on-surface"
+                      required
+                    />
+                  </div>
                 </div>
-              ) : (
-                <div className="flex items-center gap-3 p-4 bg-surface-container rounded-xl text-on-surface-variant text-sm">
-                  <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></span>
-                  Preparing secure payment gateway...
-                </div>
-              )
+
+                <button
+                  type="button"
+                  onClick={handleSimulatedCardPayment}
+                  disabled={submitting}
+                  className="w-full bg-primary text-on-primary py-4.5 rounded-xl font-bold text-sm shadow-md hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-60 cursor-pointer"
+                >
+                  {submitting ? (
+                    <>
+                      <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+                      Processing Simulated Payment...
+                    </>
+                  ) : (
+                    <>
+                      Pay ₹{total.toLocaleString('en-IN')} &amp; Complete Booking
+                      <span className="material-symbols-outlined">lock</span>
+                    </>
+                  )}
+                </button>
+              </div>
             ) : (
               // UPI Payments UI
               <div className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/30 space-y-6">

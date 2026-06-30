@@ -6,7 +6,9 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import StripePaymentForm from '../components/StripePaymentForm';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder_publishable');
+const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder_publishable';
+const isValidStripeKey = stripeKey && stripeKey.startsWith('pk_') && stripeKey.length > 25;
+const stripePromise = isValidStripeKey ? loadStripe(stripeKey) : null;
 
 const Checkout = () => {
   const { id } = useParams();

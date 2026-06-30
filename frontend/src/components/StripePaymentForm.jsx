@@ -30,16 +30,11 @@ const StripePaymentForm = ({ clientSecret, totalAmount, onSuccess, onError, gues
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!stripe || !elements) {
-      // Stripe.js has not loaded yet.
-      return;
-    }
-
     setIsProcessing(true);
     setErrorMessage('');
 
     // Handle simulation mode fallback
-    const isSimulated = clientSecret && clientSecret.startsWith('mock_secret_intent_');
+    const isSimulated = !stripe || !elements || (clientSecret && clientSecret.startsWith('mock_secret_intent_'));
     if (isSimulated) {
       console.log('💳 [SIMULATED PAYMENT] Processing credit card via mock Stripe Elements...');
       setTimeout(() => {
@@ -82,9 +77,44 @@ const StripePaymentForm = ({ clientSecret, totalAmount, onSuccess, onError, gues
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 transition-all focus-within:ring-1 focus-within:ring-primary focus-within:border-primary">
-        <CardElement options={cardElementOptions} />
-      </div>
+      {!stripe || !elements ? (
+        /* Mock Credit Card Form Fields when Stripe is disabled/placeholder */
+        <div className="space-y-4">
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4">
+            <input
+              type="text"
+              placeholder="Card Number (4242 4242 4242 4242)"
+              className="w-full bg-transparent border-none p-0 text-sm outline-none text-on-surface"
+              defaultValue="4242 4242 4242 4242"
+              required
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4">
+              <input
+                type="text"
+                placeholder="MM/YY"
+                className="w-full bg-transparent border-none p-0 text-sm outline-none text-on-surface"
+                defaultValue="12/29"
+                required
+              />
+            </div>
+            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4">
+              <input
+                type="text"
+                placeholder="CVC"
+                className="w-full bg-transparent border-none p-0 text-sm outline-none text-on-surface"
+                defaultValue="123"
+                required
+              />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 transition-all focus-within:ring-1 focus-within:ring-primary focus-within:border-primary">
+          <CardElement options={cardElementOptions} />
+        </div>
+      )}
 
       {errorMessage && (
         <div className="bg-error/8 text-error text-xs font-semibold p-4 rounded-xl">
@@ -94,8 +124,8 @@ const StripePaymentForm = ({ clientSecret, totalAmount, onSuccess, onError, gues
 
       <button
         type="submit"
-        disabled={!stripe || isProcessing}
-        className="w-full bg-primary text-on-primary py-4.5 rounded-xl font-bold text-sm shadow-md hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-60 cursor-pointer"
+        disabled={isProcessing}
+        className="w-full bg-primary text-on-primary py-4.5 rounded-xl font-bold text-sm shadow-md hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-60 cursor-pointer animate-fade-in"
       >
         {isProcessing ? (
           <>

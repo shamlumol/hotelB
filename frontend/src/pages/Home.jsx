@@ -13,6 +13,14 @@ const Home = () => {
   const { API_URL } = useContext(AuthContext);
   const [featuredStays, setFeaturedStays] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showVideo, setShowVideo] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowVideo(true);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const fetchFeatured = async () => {
@@ -63,18 +71,20 @@ const Home = () => {
       {/* Hero Section */}
       <section className="relative h-[700px] w-full flex items-center justify-center">
         <div className="absolute inset-0 z-0 overflow-hidden">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            poster="https://images.unsplash.com/photo-1593693397690-362cb9666fc2?auto=format&fit=crop&w=1600&q=80"
-            className="w-full h-full object-cover scale-105 object-center"
-            style={{ background: 'url(https://images.unsplash.com/photo-1593693397690-362cb9666fc2?auto=format&fit=crop&w=1600&q=80) center/cover no-repeat' }}
-          >
-            <source src={heroVideo} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+          {showVideo && (
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="metadata"
+              poster="https://images.unsplash.com/photo-1593693397690-362cb9666fc2?auto=format&fit=crop&w=1600&q=80"
+              className="w-full h-full object-cover scale-105 object-center"
+            >
+              <source src={heroVideo} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          )}
           <div className="absolute inset-0 bg-black/40"></div>
         </div>
         <div className="relative z-10 text-center px-6 max-w-4xl -translate-y-6">

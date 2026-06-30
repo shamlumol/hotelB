@@ -2,6 +2,10 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import gpayLogo from '../assets/gpay.svg';
+import phonepeLogo from '../assets/phonepe.svg';
+import paytmLogo from '../assets/paytm.svg';
+import upiLogo from '../assets/upi.svg';
 
 const Checkout = () => {
   const { id } = useParams();
@@ -433,10 +437,10 @@ const Checkout = () => {
                   {/* UPI App Selection Grid */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {[
-                      { id: 'GPay', name: 'Google Pay', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg' },
-                      { id: 'PhonePe', name: 'PhonePe', logo: 'https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg' },
-                      { id: 'Paytm', name: 'Paytm', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo.svg' },
-                      { id: 'Custom', name: 'Other UPI ID', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg' }
+                      { id: 'GPay', name: 'Google Pay', logo: gpayLogo },
+                      { id: 'PhonePe', name: 'PhonePe', logo: phonepeLogo },
+                      { id: 'Paytm', name: 'Paytm', logo: paytmLogo },
+                      { id: 'Custom', name: 'Other UPI ID', logo: upiLogo }
                     ].map((app) => (
                       <button
                         key={app.id}

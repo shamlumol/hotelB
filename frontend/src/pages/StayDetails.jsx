@@ -78,6 +78,12 @@ const StayDetails = () => {
   const [cleanliness, setCleanliness] = useState(5);
   const [service, setService] = useState(5);
   const [locationVal, setLocationVal] = useState(5);
+  const [editingReviewId, setEditingReviewId] = useState(null);
+  const [editComment, setEditComment] = useState('');
+  const [editRating, setEditRating] = useState(5);
+  const [editCleanliness, setEditCleanliness] = useState(5);
+  const [editService, setEditService] = useState(5);
+  const [editLocationVal, setEditLocationVal] = useState(5);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewError, setReviewError] = useState('');
   const [reviewSuccess, setReviewSuccess] = useState('');
@@ -117,6 +123,60 @@ const StayDetails = () => {
       setReviewError(err.response?.data?.message || 'Failed to submit review');
     } finally {
       setSubmittingReview(false);
+    }
+  };
+
+  const startEditingReview = (rev) => {
+    setEditingReviewId(rev._id);
+    setEditComment(rev.comment);
+    setEditRating(rev.rating);
+    setEditCleanliness(rev.cleanliness || 5);
+    setEditService(rev.service || 5);
+    setEditLocationVal(rev.location || 5);
+  };
+
+  const handleReviewEditSubmit = async (e, reviewId) => {
+    e.preventDefault();
+    if (!editComment.trim()) {
+      alert('Please write a comment');
+      return;
+    }
+    try {
+      const res = await axios.put(`${API_URL}/stays/${id}/reviews/${reviewId}`, {
+        comment: editComment,
+        rating: editRating,
+        cleanliness: editCleanliness,
+        service: editService,
+        location: editLocationVal
+      });
+      if (res.data.success) {
+        setStay(prev => ({
+          ...prev,
+          reviews: res.data.data,
+          rating: res.data.rating,
+          reviewsCount: res.data.reviewsCount
+        }));
+        setEditingReviewId(null);
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update review');
+    }
+  };
+
+  const handleReviewDelete = async (reviewId) => {
+    if (!window.confirm('Are you sure you want to delete your review?')) return;
+    try {
+      const res = await axios.delete(`${API_URL}/stays/${id}/reviews/${reviewId}`);
+      if (res.data.success) {
+        setStay(prev => ({
+          ...prev,
+          reviews: res.data.data,
+          rating: res.data.rating,
+          reviewsCount: res.data.reviewsCount
+        }));
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to delete review');
     }
   };
 
@@ -667,25 +727,159 @@ const StayDetails = () => {
 
             <div className="space-y-8">
               {stay.reviews && stay.reviews.length > 0 ? (
-                stay.reviews.map((review, idx) => (
-                  <div key={idx} className="border-b border-outline-variant/30 pb-8">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center font-bold text-primary text-sm uppercase">
-                        {review.reviewerName.substring(0, 2)}
-                      </div>
-                      <div>
-                        <h5 className="font-semibold text-sm text-on-surface">{review.reviewerName}</h5>
-                        <p className="text-xs text-on-surface-variant">{review.dateString}</p>
-                      </div>
+                stay.reviews.map((review, idx) => {
+                  const isOwnReview = user && (
+                    review.user === user._id || 
+                    review.user === user.id || 
+                    (review.user?._id && (review.user._id === user._id || review.user._id === user.id)) ||
+                    user.role === 'admin'
+                  );
+
+                  return (
+                    <div key={idx} className="border-b border-outline-variant/30 pb-8 text-left">
+                      {editingReviewId === review._id ? (
+                        /* Inline Edit Form */
+                        <form onSubmit={(e) => handleReviewEditSubmit(e, review._id)} className="space-y-4 bg-surface-container-low p-4 rounded-xl border border-outline-variant/30">
+                          <h4 className="font-semibold text-xs text-primary uppercase tracking-wider">Edit Your Review</h4>
+                          
+                          {/* Rating Stars Selection */}
+                          <div>
+                            <label className="block text-[10px] font-bold text-secondary uppercase mb-1">Overall Rating</label>
+                            <div className="flex gap-1">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                  key={star}
+                                  type="button"
+                                  onClick={() => setEditRating(star)}
+                                  className="text-xl transition-transform hover:scale-110 focus:outline-none cursor-pointer"
+                                >
+                                  <span
+                                    className="material-symbols-outlined text-2xl"
+                                    style={{
+                                      fontVariationSettings: star <= editRating ? '"FILL" 1' : '"FILL" 0',
+                                      color: star <= editRating ? '#C89B3C' : '#ccc'
+                                    }}
+                                  >
+                                    star
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Category sliders */}
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                              <label className="block text-[9px] font-bold text-secondary uppercase">Cleanliness ({editCleanliness}/5)</label>
+                              <input
+                                type="range"
+                                min="1"
+                                max="5"
+                                value={editCleanliness}
+                                onChange={(e) => setEditCleanliness(Number(e.target.value))}
+                                className="w-full accent-primary h-1 bg-surface-container rounded-lg appearance-none cursor-pointer"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[9px] font-bold text-secondary uppercase">Service ({editService}/5)</label>
+                              <input
+                                type="range"
+                                min="1"
+                                max="5"
+                                value={editService}
+                                onChange={(e) => setEditService(Number(e.target.value))}
+                                className="w-full accent-primary h-1 bg-surface-container rounded-lg appearance-none cursor-pointer"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[9px] font-bold text-secondary uppercase">Location ({editLocationVal}/5)</label>
+                              <input
+                                type="range"
+                                min="1"
+                                max="5"
+                                value={editLocationVal}
+                                onChange={(e) => setEditLocationVal(Number(e.target.value))}
+                                className="w-full accent-primary h-1 bg-surface-container rounded-lg appearance-none cursor-pointer"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Comment input */}
+                          <div>
+                            <textarea
+                              rows="3"
+                              value={editComment}
+                              onChange={(e) => setEditComment(e.target.value)}
+                              className="w-full p-3 rounded-lg border border-outline-variant/40 bg-transparent text-xs focus:ring-1 focus:ring-primary focus:border-primary outline-none"
+                              required
+                            ></textarea>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex gap-2">
+                            <button
+                              type="submit"
+                              className="bg-primary text-on-primary px-4 py-2 rounded-lg font-bold text-[10px] hover:opacity-90 transition-all cursor-pointer"
+                            >
+                              Save Changes
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingReviewId(null)}
+                              className="border border-outline-variant text-on-surface px-4 py-2 rounded-lg font-bold text-[10px] hover:bg-surface-container-low transition-all cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        /* Normal Review Rendering */
+                        <>
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center font-bold text-primary text-sm uppercase">
+                                {review.reviewerName.substring(0, 2)}
+                              </div>
+                              <div>
+                                <h5 className="font-semibold text-sm text-on-surface">{review.reviewerName}</h5>
+                                <p className="text-xs text-on-surface-variant">{review.dateString}</p>
+                              </div>
+                            </div>
+
+                            {/* Edit/Delete Actions */}
+                            {isOwnReview && (
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => startEditingReview(review)}
+                                  className="text-xs text-primary hover:underline font-semibold flex items-center gap-1 cursor-pointer"
+                                  title="Edit review"
+                                >
+                                  <span className="material-symbols-outlined text-[16px]">edit</span>
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => handleReviewDelete(review._id)}
+                                  className="text-xs text-error hover:underline font-semibold flex items-center gap-1 cursor-pointer"
+                                  title="Delete review"
+                                >
+                                  <span className="material-symbols-outlined text-[16px]">delete</span>
+                                  Delete
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <p className="italic text-on-surface-variant mb-3 leading-relaxed text-sm">"{review.comment}"</p>
+                          <div className="flex gap-4 text-xs text-tertiary font-semibold">
+                            <span>Cleanliness: {(review.cleanliness || 5).toFixed(1)}</span>
+                            <span>Service: {(review.service || 5).toFixed(1)}</span>
+                            <span>Location: {(review.location || 5).toFixed(1)}</span>
+                          </div>
+                        </>
+                      )}
                     </div>
-                    <p className="italic text-on-surface-variant mb-3 leading-relaxed text-sm">"{review.comment}"</p>
-                    <div className="flex gap-4 text-xs text-tertiary font-semibold">
-                      <span>Cleanliness: {review.cleanliness.toFixed(1)}</span>
-                      <span>Service: {review.service.toFixed(1)}</span>
-                      <span>Location: {review.location.toFixed(1)}</span>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p className="text-on-surface-variant text-sm italic">No reviews yet. Be the first to stay here!</p>
               )}

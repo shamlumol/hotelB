@@ -23,6 +23,10 @@ const RoomSchema = new mongoose.Schema({
 });
 
 const ReviewSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
   reviewerName: {
     type: String,
     required: true

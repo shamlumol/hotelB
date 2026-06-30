@@ -121,7 +121,7 @@ const sendBookingConfirmation = async (userEmail, bookingDetails) => {
           </div>
           
           <div style="text-align: center; margin: 30px 0 20px 0;">
-            <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/my-bookings" 
+            <a href="${(process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost')) ? process.env.FRONTEND_URL : 'https://the-hotelb.netlify.app'}/my-bookings" 
                style="background: #004630; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
               View My Bookings
             </a>

@@ -177,6 +177,7 @@ router.post('/:id/reviews', protect, async (req, res) => {
     }
 
     const newReview = {
+      user: req.user._id,
       reviewerName: req.user.name || 'Anonymous Guest',
       dateString: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
       comment,
@@ -204,6 +205,96 @@ router.post('/:id/reviews', protect, async (req, res) => {
   } catch (error) {
     console.error('[DEBUG] Review Error:', error);
     res.status(500).json({ success: false, message: error.message || 'Failed to save review' });
+  }
+});
+
+// @desc    Update a review
+// @route   PUT /api/stays/:id/reviews/:reviewId
+// @access  Private
+router.put('/:id/reviews/:reviewId', protect, async (req, res) => {
+  try {
+    const { comment, rating, cleanliness, service, location } = req.body;
+    const stay = await Stay.findById(req.params.id);
+    if (!stay) {
+      return res.status(404).json({ success: false, message: 'Stay not found' });
+    }
+
+    const review = stay.reviews.id(req.params.reviewId);
+    if (!review) {
+      return res.status(404).json({ success: false, message: 'Review not found' });
+    }
+
+    // Check ownership or admin
+    if (!review.user || (review.user.toString() !== req.user.id && req.user.role !== 'admin')) {
+      return res.status(401).json({ success: false, message: 'Not authorized to update this review' });
+    }
+
+    if (comment) review.comment = comment;
+    if (rating !== undefined) review.rating = Number(rating);
+    if (cleanliness !== undefined) review.cleanliness = Number(cleanliness);
+    if (service !== undefined) review.service = Number(service);
+    if (location !== undefined) review.location = Number(location);
+
+    // Recalculate average rating
+    const totalRating = stay.reviews.reduce((acc, item) => acc + item.rating, 0);
+    stay.rating = Number((totalRating / stay.reviews.length).toFixed(1));
+
+    await stay.save();
+
+    res.json({
+      success: true,
+      data: stay.reviews,
+      rating: stay.rating,
+      reviewsCount: stay.reviews.length
+    });
+  } catch (error) {
+    console.error('[DEBUG] Update Review Error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to update review' });
+  }
+});
+
+// @desc    Delete a review
+// @route   DELETE /api/stays/:id/reviews/:reviewId
+// @access  Private
+router.delete('/:id/reviews/:reviewId', protect, async (req, res) => {
+  try {
+    const stay = await Stay.findById(req.params.id);
+    if (!stay) {
+      return res.status(404).json({ success: false, message: 'Stay not found' });
+    }
+
+    const review = stay.reviews.id(req.params.reviewId);
+    if (!review) {
+      return res.status(404).json({ success: false, message: 'Review not found' });
+    }
+
+    // Check ownership or admin
+    if (!review.user || (review.user.toString() !== req.user.id && req.user.role !== 'admin')) {
+      return res.status(401).json({ success: false, message: 'Not authorized to delete this review' });
+    }
+
+    review.deleteOne();
+    stay.reviewsCount = stay.reviews.length;
+
+    // Recalculate average rating
+    if (stay.reviews.length > 0) {
+      const totalRating = stay.reviews.reduce((acc, item) => acc + item.rating, 0);
+      stay.rating = Number((totalRating / stay.reviews.length).toFixed(1));
+    } else {
+      stay.rating = 5.0;
+    }
+
+    await stay.save();
+
+    res.json({
+      success: true,
+      data: stay.reviews,
+      rating: stay.rating,
+      reviewsCount: stay.reviewsCount
+    });
+  } catch (error) {
+    console.error('[DEBUG] Delete Review Error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to delete review' });
   }
 });
 

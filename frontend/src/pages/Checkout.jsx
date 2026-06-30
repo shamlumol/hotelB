@@ -239,7 +239,7 @@ const Checkout = () => {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg p-3 text-sm focus:border-primary transition-all outline-none" 
-                    placeholder="John Doe" 
+                    placeholder="Enter your name" 
                   />
                 </div>
                 <div className="flex flex-col gap-2 text-left">
@@ -250,7 +250,7 @@ const Checkout = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg p-3 text-sm focus:border-primary transition-all outline-none" 
-                    placeholder="john@example.com" 
+                    placeholder="Enter your email" 
                   />
                 </div>
               </div>
@@ -399,7 +399,7 @@ const Checkout = () => {
                       type="text"
                       value={cardName}
                       onChange={(e) => setCardName(e.target.value)}
-                      placeholder="John Doe"
+                      placeholder="Cardholder Name"
                       className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-3.5 text-sm focus:border-primary outline-none focus:ring-1 focus:ring-primary text-on-surface"
                       required
                     />

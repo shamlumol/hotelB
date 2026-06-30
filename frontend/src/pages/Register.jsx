@@ -1,4 +1,4 @@
-﻿import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { GoogleLogin } from '@react-oauth/google';
@@ -120,7 +120,7 @@ const Register = () => {
                   className="w-full h-10 bg-white border border-outline-variant rounded-lg px-3.5 font-body text-xs outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary" 
                   id="full_name" 
                   name="full_name" 
-                  placeholder="E.g. Elena Gilbert" 
+                  placeholder="Enter your name" 
                   type="text"
                   required
                   value={name}
@@ -136,7 +136,7 @@ const Register = () => {
                   className="w-full h-10 bg-white border border-outline-variant rounded-lg px-3.5 font-body text-xs outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary" 
                   id="email" 
                   name="email" 
-                  placeholder="name@luxury-travel.com" 
+                  placeholder="Enter your email" 
                   type="email"
                   required
                   value={email}

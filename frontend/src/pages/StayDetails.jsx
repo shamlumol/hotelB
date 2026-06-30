@@ -72,6 +72,34 @@ const StayDetails = () => {
   const [checkOut, setCheckOut] = useState(getFutureDateString(2));
   const [guests, setGuests] = useState('2 Guests');
 
+  const handleCheckInChange = (val) => {
+    setCheckIn(val);
+    const checkInDate = new Date(val);
+    const checkOutDate = new Date(checkOut);
+    if (checkOutDate <= checkInDate) {
+      const nextDay = new Date(checkInDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      const year = nextDay.getFullYear();
+      const month = String(nextDay.getMonth() + 1).padStart(2, '0');
+      const day = String(nextDay.getDate()).padStart(2, '0');
+      setCheckOut(`${year}-${month}-${day}`);
+    }
+  };
+
+  const handleCheckOutChange = (val) => {
+    setCheckOut(val);
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(val);
+    if (checkInDate >= checkOutDate) {
+      const prevDay = new Date(checkOutDate);
+      prevDay.setDate(prevDay.getDate() - 1);
+      const year = prevDay.getFullYear();
+      const month = String(prevDay.getMonth() + 1).padStart(2, '0');
+      const day = String(prevDay.getDate()).padStart(2, '0');
+      setCheckIn(`${year}-${month}-${day}`);
+    }
+  };
+
   // Client Review Form states
   const [comment, setComment] = useState('');
   const [rating, setRating] = useState(5);
@@ -1040,7 +1068,7 @@ const StayDetails = () => {
 
               <div className="space-y-4 mb-6">
                 <div className="grid grid-cols-2 border border-outline-variant/30 rounded-lg overflow-hidden text-left">
-                  <div className="p-3 border-r border-outline-variant/30 hover:bg-surface-container-low transition-colors">
+                  <div className="p-3 border-r border-outline-variant/30 hover:bg-surface-container-low transition-colors relative overflow-hidden">
                     <label htmlFor="check-in-date" className="block text-[10px] uppercase font-bold text-secondary cursor-pointer">
                       Check-in
                     </label>
@@ -1049,11 +1077,11 @@ const StayDetails = () => {
                       type="date"
                       value={checkIn}
                       min={getTodayString()}
-                      onChange={(e) => setCheckIn(e.target.value)}
-                      className="border-none focus:ring-0 p-0 text-sm font-semibold text-on-surface bg-transparent w-full mt-1 block cursor-pointer"
+                      onChange={(e) => handleCheckInChange(e.target.value)}
+                      className="border-none focus:ring-0 h-8 py-1 text-sm font-semibold text-on-surface bg-transparent w-full mt-1 block cursor-pointer relative z-10"
                     />
                   </div>
-                  <div className="p-3 hover:bg-surface-container-low transition-colors">
+                  <div className="p-3 hover:bg-surface-container-low transition-colors relative overflow-hidden">
                     <label htmlFor="check-out-date" className="block text-[10px] uppercase font-bold text-secondary cursor-pointer">
                       Check-out
                     </label>
@@ -1062,8 +1090,8 @@ const StayDetails = () => {
                       type="date"
                       value={checkOut}
                       min={checkIn || getTodayString()}
-                      onChange={(e) => setCheckOut(e.target.value)}
-                      className="border-none focus:ring-0 p-0 text-sm font-semibold text-on-surface bg-transparent w-full mt-1 block cursor-pointer"
+                      onChange={(e) => handleCheckOutChange(e.target.value)}
+                      className="border-none focus:ring-0 h-8 py-1 text-sm font-semibold text-on-surface bg-transparent w-full mt-1 block cursor-pointer relative z-10"
                     />
                   </div>
                 </div>

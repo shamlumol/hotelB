@@ -81,7 +81,6 @@ const Home = () => {
               className="w-full h-full object-cover scale-105 object-center"
             >
               <source src={heroVideo} type="video/mp4" />
-              Your browser does not support the video tag.
             </video>
           )}
           <div className="absolute inset-0 bg-black/40"></div>
@@ -116,7 +115,7 @@ const Home = () => {
             </h2>
             <p className="text-on-surface-variant font-body text-sm">Discover the most sought-after corners of God's Own Country.</p>
           </div>
-          <button 
+          <button
             onClick={() => navigate('/stays')}
             className="text-primary font-bold flex items-center gap-1 group hover:opacity-80 transition-opacity"
           >
@@ -126,13 +125,13 @@ const Home = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-gutter">
           {destinations.map((dest, idx) => (
-            <div 
+            <div
               key={idx}
               onClick={() => navigate(`/stays?location=${dest.name}`)}
               className="group cursor-pointer relative h-96 overflow-hidden rounded-xl"
             >
-              <div 
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" 
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
                 style={{ backgroundImage: `url(${dest.img})` }}
               ></div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
@@ -194,7 +193,7 @@ const Home = () => {
               <p className="text-on-secondary-container font-body leading-relaxed mb-8">
                 Go beyond the stay. Immerse yourself in the ancient traditions and breathtaking landscapes of Kerala with our curated experiences.
               </p>
-              <button 
+              <button
                 onClick={() => navigate('/experiences')}
                 className="bg-primary text-on-primary px-8 py-3 rounded-lg font-bold hover:bg-primary-container transition-all text-sm"
               >
@@ -202,7 +201,7 @@ const Home = () => {
               </button>
             </div>
             <div className="md:w-2/3 grid grid-cols-1 sm:grid-cols-3 gap-gutter">
-              <div 
+              <div
                 onClick={() => navigate('/experiences?category=Water')}
                 className="flex flex-col items-center text-center cursor-pointer group"
               >
@@ -213,7 +212,7 @@ const Home = () => {
                 <p className="text-on-secondary-container text-sm">Luxury private cruises through the calm backwaters.</p>
               </div>
 
-              <div 
+              <div
                 onClick={() => navigate('/experiences?category=Wellness')}
                 className="flex flex-col items-center text-center cursor-pointer group"
               >
@@ -224,7 +223,7 @@ const Home = () => {
                 <p className="text-on-secondary-container text-sm">Ancient rejuvenation therapies by certified practitioners.</p>
               </div>
 
-              <div 
+              <div
                 onClick={() => navigate('/experiences?category=Nature')}
                 className="flex flex-col items-center text-center cursor-pointer group"
               >
@@ -298,18 +297,18 @@ const Home = () => {
             <p className="text-on-primary-container font-body leading-relaxed mb-10 text-sm md:text-base">
               Join our community to receive curated travel guides, exclusive offers, and a taste of Kerala serenity in your inbox.
             </p>
-            <form 
+            <form
               onSubmit={(e) => { e.preventDefault(); alert('Thank you for subscribing to HotelB!'); }}
               className="flex flex-col md:flex-row gap-4"
             >
-              <input 
-                className="flex-1 px-6 py-4 rounded-lg bg-surface border-none focus:ring-2 focus:ring-tertiary-fixed text-on-surface text-sm placeholder:text-on-surface-variant/70 outline-none" 
-                placeholder="Your email address" 
+              <input
+                className="flex-1 px-6 py-4 rounded-lg bg-surface border-none focus:ring-2 focus:ring-tertiary-fixed text-on-surface text-sm placeholder:text-on-surface-variant/70 outline-none"
+                placeholder="Your email address"
                 type="email"
                 required
               />
-              <button 
-                className="bg-tertiary-fixed text-on-tertiary-fixed px-10 py-4 rounded-lg font-bold hover:bg-tertiary-fixed-dim transition-colors text-sm" 
+              <button
+                className="bg-tertiary-fixed text-on-tertiary-fixed px-10 py-4 rounded-lg font-bold hover:bg-tertiary-fixed-dim transition-colors text-sm"
                 type="submit"
               >
                 Subscribe

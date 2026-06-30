@@ -73,8 +73,13 @@ const StayDetails = () => {
   const [guests, setGuests] = useState('2 Guests');
 
   const handleCheckInChange = (val) => {
-    setCheckIn(val);
-    const checkInDate = new Date(val);
+    const today = getTodayString();
+    let selectedDate = val;
+    if (selectedDate < today) {
+      selectedDate = today;
+    }
+    setCheckIn(selectedDate);
+    const checkInDate = new Date(selectedDate);
     const checkOutDate = new Date(checkOut);
     if (checkOutDate <= checkInDate) {
       const nextDay = new Date(checkInDate);
@@ -87,9 +92,16 @@ const StayDetails = () => {
   };
 
   const handleCheckOutChange = (val) => {
-    setCheckOut(val);
+    const today = getTodayString();
+    let selectedDate = val;
+    // Checkout must be at least tomorrow / 1 day after today
+    const tomorrow = getFutureDateString(1);
+    if (selectedDate < tomorrow) {
+      selectedDate = tomorrow;
+    }
+    setCheckOut(selectedDate);
     const checkInDate = new Date(checkIn);
-    const checkOutDate = new Date(val);
+    const checkOutDate = new Date(selectedDate);
     if (checkInDate >= checkOutDate) {
       const prevDay = new Date(checkOutDate);
       prevDay.setDate(prevDay.getDate() - 1);

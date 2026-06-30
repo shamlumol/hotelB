@@ -6,15 +6,17 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import StripePaymentForm from '../components/StripePaymentForm';
 
-const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder_publishable';
-const isValidStripeKey = stripeKey && stripeKey.startsWith('pk_') && stripeKey.length > 25;
-const stripePromise = isValidStripeKey ? loadStripe(stripeKey) : null;
-
 const Checkout = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { API_URL, user } = useContext(AuthContext);
+
+  const stripePromise = React.useMemo(() => {
+    const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder_publishable';
+    const isValid = stripeKey && stripeKey.startsWith('pk_') && stripeKey.length > 25;
+    return isValid ? loadStripe(stripeKey) : null;
+  }, []);
 
   const [stay, setStay] = useState(null);
   const [loading, setLoading] = useState(true);

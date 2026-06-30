@@ -768,11 +768,10 @@ const StayDetails = () => {
             <div className="space-y-8">
               {stay.reviews && stay.reviews.length > 0 ? (
                 stay.reviews.map((review, idx) => {
-                  const isOwnReview = user && (
+                  const isOwnReview = user && review.user && (
                     review.user === user._id || 
                     review.user === user.id || 
-                    (review.user?._id && (review.user._id === user._id || review.user._id === user.id)) ||
-                    user.role === 'admin'
+                    (review.user?._id && (review.user._id === user._id || review.user._id === user.id))
                   );
 
                   return (

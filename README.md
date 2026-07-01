@@ -1,6 +1,19 @@
 #  HotelB - Luxury Retreats & Backwater Escapes
 
-HotelB is a MERN-stack web application for booking luxury houseboats and heritage retreat experiences in Kerala, India. It features a premium user interface, customer loyalty system, dynamic stays catalog, and integrated checkout payments.
+HotelB is a MERN-stack web application for booking luxury houseboats and heritage retreat experiences in Kerala, India. Designed as a premium showcase for a developer portfolio, it features a sleek user interface, customer loyalty tier system, dynamic stays catalog, comprehensive review system, and fully simulated checkouts (Credit Card & UPI).
+
+---
+
+##  Key Features
+
+* **Dynamic Stays Catalog:** Browse through 108 luxury stays across Kerala, filtering by category, search queries, and check-in/check-out dates.
+* **Interactive Date Picker with Fail-Safe Validation:** A mobile-friendly calendar interface with bounds checking that prevents booking past dates (both in the frontend date-picker and via server-side API checks) and auto-corrects overlapping checkout dates.
+* **Simulated Payments Gateway:** Complete checkouts without needing Stripe API keys or merchant setups. Includes:
+  * **Simulated Credit Card checkout** with input validation, visual loading states, and card number formatting.
+  * **Simulated UPI Payments** featuring official Google Pay, PhonePe, Paytm, and UPI PNG brand logos, along with a full-screen app launch authorization animation.
+* **Verified Reviews System:** Users can add, edit, and delete their own reviews. Ratings are dynamically computed to update the property's average score.
+* **Email & WhatsApp Alerts (Simulated):** Booking confirmations trigger transactional email previews (using dynamic HTML invoices) and simulated Twilio WhatsApp messages printed to console logs.
+* **Customer Loyalty Tiering:** Earn points on bookings (1 point per ₹100 spent) to unlock Silver, Gold, and Platinum tiers visible on the user dashboard.
 
 ---
 
@@ -52,13 +65,9 @@ You can log in instantly with these pre-configured user credentials:
 
 ---
 
-## Stripe Test Payments
-* **Integration:** Rendered securely via Stripe Elements.
-* **Testing:** Select **Credit Card** during checkout and input the Stripe test card:
-  * **Card Number:** `4242 4242 4242 4242`
-  * **Expiry & CVV:** Any future date and any 3-digit CVV (e.g. `12/30`, `123`).
-* **Zero-Config Simulation:** If your Stripe keys in `.env` are placeholders, the payment will automatically run in a safe, visual **simulated mode** so you can test checkout without any keys!
-* **Configuration:** To use your real Stripe developer account, replace the Stripe keys in `backend/.env` and `frontend/.env` with your actual Stripe credentials.
+##  Simulated Payments Flow
+* **Credit Card:** Select **Credit Card** during checkout and input simulated details (e.g. Card Number `4242 4242 4242 4242` and CVV `123`). The checkout shows an animated spinner and confirms the booking under a mock transaction ID.
+* **UPI Payments:** Choose GPay, PhonePe, Paytm, or generic UPI. A premium overlay simulates opening your phone's payment application, waiting for authorization, and completing the stay reservation.
 
 ---
 
